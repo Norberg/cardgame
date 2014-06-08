@@ -1,5 +1,19 @@
-module BlackJack( Card(..), Color(..), Rank(..) , Hand, Deck, getValueCard
-                , getValueHand, createDeck, pickCard) where
+module BlackJack(
+    Card(..),
+    Color(..),
+    Rank(..),
+    Winner(..),
+    Hand,
+    Deck,
+    getValueCard,
+    getValueHand,
+    createDeck,
+    pickCard,
+    shouldDealerStop,
+    getWinner,
+    shuffle,
+    play
+) where
 
 import System.Random
 
@@ -15,6 +29,8 @@ data Card = Card{ color :: Color
 type Hand = [Card]
 
 type Deck = [Card]
+
+data Winner = Player | House | Draw deriving(Show, Eq)
 
 getValueRank :: Rank -> Int
 getValueRank Ace = 11
@@ -60,6 +76,28 @@ shuffle e = shuffle' e []
 pickCard :: Deck -> (Card, Deck)
 pickCard deck = (head deck, tail deck)
 
-main = do 
+
+getWinner :: Deck -> Deck -> Winner
+getWinner player house
+    | playerScore > 21 = House
+    | houseScore > 21 = Player
+    | playerScore > houseScore = Player
+    | houseScore > playerScore = House
+    | otherwise = Draw
+    where 
+        playerScore = getValueHand player
+        houseScore = getValueHand house
+
+dealerPlay :: Deck -> Hand -> (Hand, Deck)
+dealerPlay deck hand
+    | shouldDealerStop hand = (hand, deck)
+    | otherwise = dealerPlay (d c ++ hand)
+    where
+        (d, c) = pickCard deck
+
+
+play :: IO()
+play = do 
     deck <- shuffle createDeck
-    putStrLn $ show $ deck
+    putStrLn "Black Jack!"
+    putStrLn "Dealer Picks cards,"
