@@ -14,6 +14,7 @@ module BlackJack(
     getWinner,
     shuffle,
     play,
+    scoreBoard,
     dealerFinishPlay
 ) where
 
@@ -26,7 +27,10 @@ data Rank = King | Queen | Jack | Ten | Nine | Eight | Seven | Six | Five
 
 data Card = Card{ color :: Color
                 , rank :: Rank
-} deriving (Show, Eq)
+} deriving (Eq)
+
+instance Show Card where
+    show (Card color rank) = show rank ++ " of " ++ show color
 
 type Hand = [Card]
 
@@ -100,9 +104,43 @@ dealerFinishPlay hand deck
     where
         (new_card, new_deck) = pickCard deck
 
+scoreBoard :: Hand -> String
+scoreBoard hand = "Score: " ++ show (getValueHand hand) ++ "\n" ++
+    "Hand: " ++ show(hand)
+
+playerPlay :: Deck -> Hand -> IO (Hand, Deck)
+playerPlay deck hand = do
+    let (newCard, newDeck) = pickCard deck
+    let newHand = newCard : hand
+    putStrLn ("Player: " ++ scoreBoard newHand)
+    shouldContinue <- drawOrStop
+    if shouldContinue then 
+        do
+            playerPlay newDeck newHand
+    else
+        do
+            return (newHand, newDeck)
+
+drawOrStop :: IO Bool
+drawOrStop = do
+    putStrLn "(D)raw or (S)top?"
+    args <- getLine
+    let arg = head args
+    case arg of
+        'D' -> return True
+        'd' -> return True
+        'S' -> return False
+        's' -> return False
+        _  -> drawOrStop
 
 play :: IO()
 play = do 
     deck <- shuffle createDeck
     putStrLn "Black Jack!"
     putStrLn "Dealer Picks cards,"
+    let (dealerInitHand, deck1) = pickCards deck 1
+    putStrLn ("Dealer: " ++ scoreBoard dealerInitHand)
+    (playerHand, deck2) <- playerPlay deck1 []
+    let (dealerHand, deck3) = dealerFinishPlay dealerInitHand deck2
+    putStrLn ("Dealer: " ++ scoreBoard dealerHand)
+    putStrLn ("Winner is:" ++ show ( getWinner playerHand dealerHand)) 

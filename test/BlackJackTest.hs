@@ -66,7 +66,8 @@ tests =
         assertEqual "dealers score is " 22 (getValueHand dealerHand2)
         assertEqual "house wins" House (getWinner playerHand3 dealerHand2)
         assertEqual "player stoped earlier.." Player (getWinner playerHand2 dealerHand2)
-        
+        let score_board = "Score: 22\n" ++ "Hand: [King of Dimonds,Two of Spades,King of Clubs]"
+        assertEqual "scoreBoard is.." score_board (scoreBoard playerHand3)
  ]
 
 

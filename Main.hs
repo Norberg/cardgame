@@ -1,3 +1,3 @@
-module Main where
+import BlackJack
 
-main = undefined
+main = play
