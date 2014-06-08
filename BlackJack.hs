@@ -9,10 +9,12 @@ module BlackJack(
     getValueHand,
     createDeck,
     pickCard,
+    pickCards,
     shouldDealerStop,
     getWinner,
     shuffle,
-    play
+    play,
+    dealerFinishPlay
 ) where
 
 import System.Random
@@ -76,6 +78,8 @@ shuffle e = shuffle' e []
 pickCard :: Deck -> (Card, Deck)
 pickCard deck = (head deck, tail deck)
 
+pickCards :: Deck -> Int -> (Hand, Deck)
+pickCards deck n = (take n deck, drop n deck)
 
 getWinner :: Deck -> Deck -> Winner
 getWinner player house
@@ -88,12 +92,13 @@ getWinner player house
         playerScore = getValueHand player
         houseScore = getValueHand house
 
-dealerPlay :: Deck -> Hand -> (Hand, Deck)
-dealerPlay deck hand
+
+dealerFinishPlay :: Hand -> Deck -> (Hand, Deck)
+dealerFinishPlay hand deck
     | shouldDealerStop hand = (hand, deck)
-    | otherwise = dealerPlay (d c ++ hand)
+    | otherwise = dealerFinishPlay (new_card : hand) new_deck
     where
-        (d, c) = pickCard deck
+        (new_card, new_deck) = pickCard deck
 
 
 play :: IO()
